@@ -1,9 +1,12 @@
+import Footer from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
+
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <div>Navbar</div>
+      <Navbar />
       {children}
-      <div>Footer</div>
+      <Footer />
     </>
   );
 };
