@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { z } from "zod";
 
 // Define validation schema
@@ -34,8 +35,16 @@ const formSchema = z.object({
     .min(11, { message: "Phone number must be at least 11 digits." }),
 });
 
+// Define Type for Form Data
+type FormData = {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+};
+
 const SignUpPage = () => {
-  const form = useForm({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -45,14 +54,30 @@ const SignUpPage = () => {
     },
   });
 
-  const onSubmit = (data: {
-    name: string;
-    email: string;
-    password: string;
-    phone: string;
-  }) => {
-    console.log("Form Data:", data);
-    // Add registration logic here (e.g., API call)
+  const onSubmit = async (data: FormData) => {
+    try {
+      // Send a POST request to the registration API
+      const response = await fetch("/api/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      // Handle the response based on success or failure
+      if (response.ok) {
+        toast.success("Registration successful");
+        form.reset();
+      } else {
+        toast.error(result.message || "Registration failed.");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      toast.error("Error during registration. Please try again.");
+    }
   };
 
   return (
