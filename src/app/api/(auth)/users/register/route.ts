@@ -3,7 +3,6 @@ import connectDB from "@/lib/connectDB";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
-// API route for user registration
 export async function POST(req: Request) {
   try {
     // Parse the request body
@@ -38,6 +37,7 @@ export async function POST(req: Request) {
       email,
       password: hashedPassword,
       phone,
+      role: "user",
     });
 
     await newUser.save();

@@ -6,6 +6,7 @@ import mongoose, { Document, Schema } from "mongoose";
 //   email: string;
 //   password: string;
 //   phone: string;
+//   role: "user" | "admin";
 // };
 
 // * If Using the Interface
@@ -14,36 +15,45 @@ interface IUser extends Document {
   email: string;
   password: string;
   phone: string;
+  role: "user" | "admin";
 }
 
 // Create a new Mongoose Schema
-const UserSchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    minlength: 2,
+const UserSchema: Schema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      minlength: 2,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      match: [
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+        "Please provide a valid email address",
+      ],
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    match: [
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-      "Please provide a valid email address",
-    ],
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-    select: false,
-  },
-  phone: {
-    type: String,
-    required: true,
-  },
-});
+  { timestamps: true }
+);
 
 // Create the User model
 const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
