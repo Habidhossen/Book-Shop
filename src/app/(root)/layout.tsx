@@ -1,14 +1,15 @@
 import Footer from "@/components/common/Footer";
 import Navbar from "@/components/common/Navbar";
+import Banner from "@/components/home/Banner";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const HomeLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      {children}
+      <Banner />
       <Footer />
     </>
   );
 };
 
-export default DashboardLayout;
+export default HomeLayout;
