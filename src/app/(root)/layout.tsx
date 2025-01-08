@@ -2,7 +2,7 @@ import Footer from "@/components/common/Footer";
 import Navbar from "@/components/common/Navbar";
 import Banner from "@/components/home/Banner";
 
-const HomeLayout = ({ children }: { children: React.ReactNode }) => {
+const HomeLayout = () => {
   return (
     <>
       <Navbar />
