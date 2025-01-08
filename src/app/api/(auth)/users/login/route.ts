@@ -38,19 +38,29 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate JWT token with user details
-    const token = jwt.sign(
+    // Generate JWT accessToken with user details
+    const accessToken = jwt.sign(
       { userId: user._id, name: user.name, email: user.email, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
 
-    // Respond with a success message and the token
+    // Sanitize the user object by excluding sensitive fields
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    // Respond with a success message and the accessToken
     return NextResponse.json(
       {
         success: true,
         message: "Login successful",
-        token,
+        data: { accessToken, user: userData },
       },
       { status: 200 }
     );

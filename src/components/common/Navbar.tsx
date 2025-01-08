@@ -1,19 +1,23 @@
 "use client";
 
 import { Twirl as Hamburger } from "hamburger-react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  console.log(session);
 
   // TODO: for testing purposes
   const pathname = "/";
 
   const menuItems = [
     { title: "Home", link: "/" },
-    { title: "Login", link: "/login" },
-    { title: "Register", link: "/signup" },
+    { title: "About", link: "" },
   ];
 
   return (
@@ -50,6 +54,15 @@ const Navbar = () => {
                 <Link href={item.link}>{item.title}</Link>
               </li>
             ))}
+            {status === "authenticated" ? (
+              <Button onClick={() => signOut()} variant="destructive">
+                Logout
+              </Button>
+            ) : (
+              <Button>
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </ul>
         </div>
       </div>

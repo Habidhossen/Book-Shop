@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,7 +19,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle } from "lucide-react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
@@ -44,6 +49,10 @@ type FormData = {
 };
 
 const SignUpPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,9 +63,13 @@ const SignUpPage = () => {
     },
   });
 
+  // handle user registration
   const onSubmit = async (data: FormData) => {
     try {
-      // Send a POST request to the registration API
+      setLoading(true);
+      setErrorMessage(null);
+
+      // user registration
       const response = await fetch("/api/users/register", {
         method: "POST",
         headers: {
@@ -64,19 +77,28 @@ const SignUpPage = () => {
         },
         body: JSON.stringify(data),
       });
-
       const result = await response.json();
 
-      // Handle the response based on success or failure
+      // If successfully registered, sign in the user by next-auth
       if (response.ok) {
+        await signIn("credentials", {
+          redirect: false,
+          email: data.email,
+          password: data.password,
+        });
+
+        router.push("/dashboard");
         toast.success("Registration successful");
-        form.reset();
       } else {
-        toast.error(result.message || "Registration failed.");
+        setErrorMessage(result?.message || "Registration failed.");
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      toast.error("Error during registration. Please try again.");
+      setErrorMessage(
+        "An error occurred during registration. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -192,9 +214,18 @@ const SignUpPage = () => {
                   )}
                 />
 
+                {/* Error Message */}
+                {errorMessage && (
+                  <Alert variant="destructive" className="bg-red-50">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{errorMessage}</AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Submit Button */}
-                <Button type="submit" className="w-full">
-                  Create Account
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Please wait..." : "Create Account"}
                 </Button>
               </form>
             </Form>

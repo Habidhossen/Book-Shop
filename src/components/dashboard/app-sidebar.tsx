@@ -18,6 +18,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useSession } from "next-auth/react";
 
 // This is sample data.
 const data = {
@@ -58,6 +59,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession();
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -68,8 +71,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <GalleryVerticalEnd className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Habid Hossen</span>
-                <span className="truncate text-xs">Admin</span>
+                <span className="truncate font-semibold">
+                  {session?.user?.name}
+                </span>
+                <span className="truncate text-xs">{session?.user?.email}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

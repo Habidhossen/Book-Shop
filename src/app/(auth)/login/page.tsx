@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,8 +19,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle } from "lucide-react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -30,6 +36,10 @@ const formSchema = z.object({
 });
 
 const LoginPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,9 +48,23 @@ const LoginPage = () => {
     },
   });
 
-  const onSubmit = (data: { email: string; password: string }) => {
-    console.log("Form Data:", data);
-    // Add login logic here (e.g., API call)
+  // handle login by next auth
+  const onSubmit = async (data: { email: string; password: string }) => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
+    if (result?.error) {
+      setErrorMessage(result?.error);
+    } else if (result?.ok) {
+      router.push("/dashboard");
+      toast.success("Login successful");
+    }
+    setLoading(false);
   };
 
   return (
@@ -72,10 +96,9 @@ const LoginPage = () => {
                           placeholder="example@gmail.com"
                           {...field}
                           className={`${
-                            form.formState.errors.password
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }`}
+                            form.formState.errors.email &&
+                            "border-red-500 bg-red-50 text-red-600"
+                          } `}
                         />
                       </FormControl>
                       <FormMessage />
@@ -96,10 +119,9 @@ const LoginPage = () => {
                           placeholder="Enter your password"
                           {...field}
                           className={`${
-                            form.formState.errors.password
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }`}
+                            form.formState.errors.password &&
+                            "border-red-500 bg-red-50 text-red-600"
+                          } `}
                         />
                       </FormControl>
                       <FormMessage />
@@ -107,9 +129,18 @@ const LoginPage = () => {
                   )}
                 />
 
+                {/* Error Message */}
+                {errorMessage && (
+                  <Alert variant="destructive" className="bg-red-50">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{errorMessage}</AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Login Button */}
-                <Button type="submit" className="w-full">
-                  Login
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Loading..." : "Login"}
                 </Button>
 
                 {/* Google Login Button */}
